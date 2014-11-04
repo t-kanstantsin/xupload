@@ -21,6 +21,12 @@ class XUpload extends CJuiInputWidget {
     public $url;
 
     /**
+     * whether getting list of existed records
+     * @var bool
+     */
+    public $checkExisted;
+
+    /**
      * set to true to use multiple file upload
      * @var boolean
      */
@@ -124,7 +130,11 @@ class XUpload extends CJuiInputWidget {
 
         $options = CJavaScript::encode($this -> options);
 
-        Yii::app() -> clientScript -> registerScript(__CLASS__ . '#' . $this -> htmlOptions['id'], "jQuery('#{$this->htmlOptions['id']}').fileupload({$options});", CClientScript::POS_READY);
+        Yii::app() -> clientScript -> registerScript(
+            __CLASS__ . '#' . $this -> htmlOptions['id'],
+            "jQuery('#{$this->htmlOptions['id']}').fileupload({$options});",
+            CClientScript::POS_READY
+        );
         $htmlOptions = array();
         if ($this -> multiple) {
             $htmlOptions["multiple"] = true;
@@ -134,6 +144,22 @@ class XUpload extends CJuiInputWidget {
                  $this -> attribute = "[]" . $this -> name;
              }*/
         }
+
+        if ($this->checkExisted) {
+            Yii::app()->clientScript->registerScript(
+                __CLASS__ . '#' . $this -> htmlOptions['id'] . '_checkExisted',
+                "$.getJSON('" . $this->url . '?_method=list' . "', function (result) {
+                    if (result && result.length) {
+                        var formObj = $('#{$this->htmlOptions['id']}');
+                        formObj
+                            .fileupload('option', 'done')
+                            .call(formObj, null, {result: result});
+                    }
+                });",
+                CClientScript::POS_END
+            );
+        }
+
 
         $this -> render($this->formView, compact('htmlOptions'));
 
