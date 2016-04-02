@@ -1,4 +1,5 @@
 <?php
+
 class XUploadForm extends CFormModel
 {
         public $file;
@@ -11,7 +12,7 @@ class XUploadForm extends CFormModel
          * @var boolean dictates whether to use sha1 to hash the file names
          * along with time and the user id to make it much harder for malicious users
          * to attempt to delete another user's file
-        */
+         */
         public $secureFileNames = false;
 
         /**
@@ -21,9 +22,9 @@ class XUploadForm extends CFormModel
          */
         public function rules()
         {
-                return array(
-                        array('file', 'file'),
-                );
+                return [
+                    ['file', 'file'],
+                ];
         }
 
         /**
@@ -31,24 +32,35 @@ class XUploadForm extends CFormModel
          */
         public function attributeLabels()
         {
-                return array(
-                        'file'=>'Upload files',
-                );
+                return [
+                    'file' => 'Upload files',
+                ];
         }
 
-        public function getReadableFileSize($retstring = null) {
+        public function getReadableFileSize($retstring = null)
+        {
                 // adapted from code at http://aidanlister.com/repos/v/function.size_readable.php
-                $sizes = array('bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+                $sizes = [
+                    'bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB',
+                ];
 
-                if ($retstring === null) { $retstring = '%01.2f %s'; }
+                if ($retstring === null) {
+                        $retstring = '%01.2f %s';
+                }
 
                 $lastsizestring = end($sizes);
 
                 foreach ($sizes as $sizestring) {
-                        if ($this->size < 1024) { break; }
-                        if ($sizestring != $lastsizestring) { $this->size /= 1024; }
+                        if ($this->size < 1024) {
+                                break;
+                        }
+                        if ($sizestring != $lastsizestring) {
+                                $this->size /= 1024;
+                        }
                 }
-                if ($sizestring == $sizes[0]) { $retstring = '%01d %s'; } // Bytes aren't normally fractional
+                if ($sizestring == $sizes[0]) {
+                        $retstring = '%01d %s';
+                } // Bytes aren't normally fractional
                 return sprintf($retstring, $this->size, $sizestring);
         }
 
@@ -58,24 +70,25 @@ class XUploadForm extends CFormModel
          * @author acorncom
          * @return string thumbnail name (if blank, thumbnail won't display)
          */
-        public function getThumbnailUrl($publicPath) {
-            return $publicPath.$this->filename;
+        public function getThumbnailUrl($publicPath)
+        {
+                return $publicPath . $this->filename;
         }
 
         /**
          * Change our filename to match our own naming convention
-        * @return bool
-        */
-        public function beforeValidate() {
+         * @return bool
+         */
+        public function beforeValidate()
+        {
 
-            //(optional) Generate a random name for our file to work on preventing
-            // malicious users from determining / deleting other users' files
-            if($this->secureFileNames)
-            {
-                $this->filename = sha1( Yii::app( )->user->id.microtime( ).$this->name);
-                $this->filename .= ".".$this->file->getExtensionName( );
-            }
+                //(optional) Generate a random name for our file to work on preventing
+                // malicious users from determining / deleting other users' files
+                if ($this->secureFileNames) {
+                        $this->filename = sha1(Yii::app()->user->id . microtime() . $this->name);
+                        $this->filename .= "." . $this->file->getExtensionName();
+                }
 
-            return parent::beforeValidate();
+                return parent::beforeValidate();
         }
 }
